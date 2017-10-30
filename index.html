@@ -4,13 +4,19 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Containers et configuration: de la promesse au concret avec git et confd</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Font awesome -->
+		<link rel="stylesheet" href="https://use.fontawesome.com/55f566347f.css">
+
+		<!-- Custom CSS to add  -->
+		<link rel="stylesheet" href="css/custom.css">
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -24,8 +30,567 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h3>Containers et configuration&nbsp;</h3>
+					<h4>De la promesse au concret avec git et confd</h4>
+					<br/>
+					<p>Alexandre Garnier (<a href="https://github.com/zigarn"><i class="fa fa-github"></i> zigarn</a>)</p>
+					<p>Présentation aimablement prêtée<br/>par <a href="https://github.com/looztra"><i class="fa fa-github"></i> Christophe</a> <a href="https://twitter.com/cfurmaniak">Furmaniak <i class="fa fa-twitter"></i></a>
+				</section>
+
+				<section>
+					<header>
+						<h4>Ice Breaker</h4>
+						<p>Ou speaker warmup ?</p>
+					</header>
+					<ul>
+						<li class="fragment">Qui utilise docker régulièrement ?</li>
+						<li class="fragment">En production ?</li>
+						<li class="fragment">Avec un orchestrateur ?</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Docker, la promesse</h4>
+						<p>Elle est pas belle ma matrice ?</p>
+					</header>
+					<img src="img/deployment-nightmare.png" />
+				</section>
+
+				<section>
+					<header>
+						<h4>Docker, la réponse</h4>
+						<p>YEAH !!! Des containers partout !</p>
+					</header>
+					<img src="img/deployment-victory.png" />
+				</section>
+
+				<section>
+					<header>
+						<h4>Containers ou Conteneurs ?</h4>
+						<p>La réalité</p>
+					</header>
+					<ul style="font-size: 0.8em">
+						<li class="fragment">Oui, les containers (ou plutôt les images) sont un moyen pratique (voire élégant ?) de packager vos apps</li>
+						<li class="fragment">Mais ⇒ Tous vos environnements (runtime) ne sont pas égaux !</li>
+						<li class="fragment">Qu'en est-il de votre configuration (runtime) ?</li>
+						<li class="fragment">
+							Combien d'environnements devez-vous gérer au fait ?
+							<ul><li>Dev, ..., QA, ..., Prod</li></ul>
+						</li>
+						<li class="fragment">Combien d'équipes (en terme de responsabilités/droits d'accès [RBAC]) ?</li>
+					</ul>
+					<p class="fragment" >Les containers ne sont pas (au premier abord) le facilitateur pour vos problématiques de configuration d'environnement</li>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration ?</h4>
+						<p>De quoi parle-t-on au fait ?</p>
+					</header>
+					<ul style="font-size: 0.8em">
+						<li>
+							Fichiers de configuration "human readable"
+							<ul>
+								<li>"server.conf" et compagnie</li>
+								<li>text/yaml/json/toml/xml/properties</li>
+							</ul>
+						</li>
+						<li>
+							Fichiers binaires (ou presque)
+							<ul>
+								<li>Certificats</li>
+								<li>Ce qui a un rapport avec le chiffrement</li>
+							</ul>
+						</li>
+						<li>Vos secrets !</li>
+					</ul>
+					<p class="fragment" >Tout ce qui permet à vos apps d'intéragir avec leur écosystème !</li>
+				</section>
+
+				<section>
+					<header>
+						<h4>Problématiques de configuration</h4>
+						<p>En rapport avec les containers... ou pas</p>
+					</header>
+					<ul style="font-size: 0.9em">
+						<li class="fragment">Comment apporter la configuration dans vos containers ?</li>
+						<li class="fragment">Comment générer la configuration pour vos containers ?</li>
+						<li class="fragment">
+							Comment gérer sa configuration ?
+							<ul>
+								<li>Historique, versions</li>
+								<li class="fragment">RBAC</li>
+								<li class="fragment">Comment partager des bouts de configuration entre applications et/ou entre environnements ?</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Plateformes Docker ?</h4>
+						<p>De nos jours ?</p>
+					</header>
+					<ul>
+						<li class="fragment">Docker tout seul ⇒ "Pet docker"</li>
+						<li class="fragment">
+							Docker à fond ⇒ "Cattle docker"<br/>
+							⇒ Orchestration FTW&nbsp;!<br/>
+							<em>(Swarm, Kubernetes, DC/OS Mesos+Marathon, Openshift, Rancher, Nomad, Titus, Deis, Tectonic, Mantl, Kontena, ...)</em>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>L'appli pour la démo</h4>
+						<p>Un super guestbook</p>
+					</header>
+					<ul>
+						<li>Front : AngularJs + nginx</li>
+						<li>Gateway : springboot</li>
+						<li>Filtre : springboot</li>
+						<li>Service  de stockage: springboot</li>
+						<li>Couche de stockage : redis</li>
+					</ul>
+					<p>Frontend → Gateway ↔ <span style="color: red">Filter Service</span><br/><div style="text-align: right">↳ Storage Service → Redis</div></p>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #0 : variables d'environnement</p>
+					</header>
+					<p>Apporter la configuration par le biais de variables d'environnement</p>
+					<ul>
+						<li class="fragment">1 Image qui package votre app</li>
+						<li class="fragment">
+							La partie configuration dynamique est exposée à votre app par des variables d'env
+							<ul style="font-size: 0.8em">
+								<li class="fragment">Ça ne fonctionne pas pour les "fichiers binaires"</li>
+								<li class="fragment">Dans la vraie vie on apporte souvent beaucoup de variables : ça peut vite devenir douloureux</li>
+								<li class="fragment">Problème de séparation des responsabilités</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #0 : variables d'environnement</p>
+					</header>
+					<pre style="width: 100%"><code class="sh" data-trim contenteditable>
+docker run -t -d \
+  -w /home/user/dev/work-dir \
+  -v /home/user/dev/work-dir:/work:rw \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  -e ******** -e ******** -e ******** -e ******** -e ******** \
+  mycompany/myimage:v1.0.2
+					</code></pre>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #1 : images "tout-en-un"</p>
+					</header>
+					<p>Intégrez votre app et sa configuration dans la même image</p>
+					<ol style="font-size: 0.8em">
+						<li class="fragment">1 image qui embarque votre app</li>
+						<li class="fragment">
+							ajout de la configuration "au dessus"<br/>
+							<code class="docker">FROM myapp:1.3.2</code> ⇒ <code class="docker">myapp-prod:1.3.2</code>
+						</li>
+					</ol>
+					<p class="fragment"><strong>PAS BIEN !!</strong></p>
+					<ul style="font-size: 0.8em">
+						<li class="fragment">Ce ne sera pas la même image sur tous les envs</li>
+						<li class="fragment">Vous devrez tout reconstruire à chaque nouvelle version (même si la conf ne change pas)</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #2 : configuration sur le "host" docker</p>
+					</header>
+					<p>Fournissez la config par le biais des volumes "mappés" sur le host docker</p>
+					<pre style="width: 100%"><code class="sh" data-trim contenteditable>
+docker run -v /data/env/prod:/data ...
+					</code></pre>
+					<p class="fragment"><strong>PAS BIEN !!</strong></p>
+					<p class="fragment">Êtes vous sur de vouloir préférer les <strong>animaux de compagnie</strong> au <strong>bétail</strong> ?</p>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #3 : data containers</p>
+					</header>
+					<p>Créez des containers dédiés pour la configuration</p>
+					<ol>
+						<li class="fragment">1 image pour votre application</li>
+						<li class="fragment">1 image pour chaque environnement</li>
+						<li class="fragment">Les 2 containers résultant assemblés par le biais du <code>--volumes-from</code> (ou équivalent)</li>
+					</ol>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #4 : configuration distante</p>
+					</header>
+					<p>Utilisons un service de configuration</p>
+					<ol>
+						<li class="fragment">1 image pour votre application</li>
+						<li class="fragment">
+							1 (ou plusieurs) services/serveurs hébergeant votre configuration distante
+							<ul style="font-size: 0.8em">
+								<li class="fragment">
+									<strong>Netflix Archaius</strong> (<a href="https://github.com/Netflix/archaius">#link</a>)
+									<ul>
+										<li>Java uniquement 😞</li>
+									</ul>
+								</li>
+								<li class="fragment">
+									<strong>Spring Cloud Config</strong> (<a href="https://cloud.spring.io/spring-cloud-config/">#link</a>)
+									<ul>
+										<li>Super méga cool pour les apps Spring(boot)</li>
+										<li>Besoin d'introduire du code pour l'utiliser dans d'autres apps java ou autres langages</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ol>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #4 : configuration distante</p>
+					</header>
+					<ul>
+						<li class="fragment">OK pour le "même image quelque soit l'env"</li>
+						<li class="fragment">
+							Points négatifs
+							<ul>
+								<li class="fragment">
+									Potentiellement très intrusif
+									<ul>
+										<li>La plupart du temps : NO-GO pour les applis "anciennes" car trop de modifs</li>
+									</ul>
+								</li>
+								<li class="fragment">Attention : désormais ces serveurs/services de configuration distante sont un nouveau composant de votre appli</li>
+							</ul>
+						</li>
+					</ol>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #5 : solution native orchestrateur</p>
+					</header>
+					<p>Swarm <a href="https://docs.docker.com/engine/swarm/configs/">configs</a> et <a href="https://docs.docker.com/engine/swarm/secrets/">secrets</a></p>
+					<ol>
+						<li class="fragment">1 image pour votre appli</li>
+						<li class="fragment">
+							Des configs et secrets pour stocker vos valeurs d'environnement
+							<ul style="font-size: 0.8em">
+								<li class="fragment">Les configs et secrets sont stockés au niveau cluster Swarm</li>
+								<li class="fragment">
+									Permettent de peupler des fichiers :
+									<ul>
+										<li><code>/{config-name}</code> pour les configs (ou autre via <code>target</code>)</li>
+										<li><code>/run/secrets/{secret-name}</code> pour les secrets</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ol>
+				</section>
+
+				<section>
+					<header>
+						<h4>Configuration dans les conteneurs</h4>
+						<p>Solution #5 : solution native orchestrateur</p>
+					</header>
+					<p>Kubernetes (et dérivés) <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configmap/">ConfigMaps</a></p>
+					<ol>
+						<li class="fragment">1 image pour votre appli</li>
+						<li class="fragment">
+							Des objets "ConfigMap" pour stocker vos valeurs d'environnement
+							<ul style="font-size: 0.8em">
+								<li class="fragment">Les ConfigMap sont stockés au niveau cluster Kubernetes</li>
+								<li class="fragment">
+									Peuvent-être utilisés pour
+									<ul>
+										<li>Peupler des vars d'env</li>
+										<li>Enrichir les "commandes" des containers</li>
+										<li>Peupler des fichiers</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ol>
+				</section>
+
+				<section>
+					<header>
+						<h4>Gestion de la configuration</h4>
+						<p>Avant de présenter la config au container</p>
+					</header>
+					<p>Nous avons besoin :</p>
+					<ul>
+						<li class="fragment">De tracer son historique</li>
+						<li class="fragment">De pouvoir s'appuyer sur des modèles pour la partager plus facilement entre les environnements</li>
+						<li class="fragment">RBAC / Gestion des droits</li>
+						<li class="fragment">
+							De pouvoir partager des éléments de config
+							<ul>
+								<li>Entre les environnements</li>
+								<li>Entre les applications</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Gestion de la configuration</h4>
+						<p>Proposition</p>
+					</header>
+					<ul>
+						<li class="fragment"><strong>Git</strong> pour la gestion de l'historique et des droits</li>
+						<li class="fragment"><strong>Confd</strong> pour les modèles</li>
+						<li class="fragment">Une structure de répertoires <strong>hierarchisée</strong> pour le partage d'éléments</li>
+					</ul>
+					<p class="fragment"><em>Note</em> : Un dépôt git peut contenir la configuration d'une ou plusieurs applications</p>
+				</section>
+
+				<section>
+					<h4>Confd ?</h4>
+					<ul>
+						<li>"Lightweight configuration management tool"</li>
+						<li>S'appuie sur des modèles (<a href="https://golang.org/pkg/text/template/#pkg-overview">golang text templates</a>)</li>
+						<li>Sources de "valeurs" : vars d'env, consul, etcd, zookeeper, redis, vault, dynamodb, ...</li>
+						<li>Project initié par <a href="https://github.com/kelseyhightower"><i class="fa fa-github"></i> Kelsey</a> <a href="https://twitter.com/kelseyhightower">Higthower <i class="fa fa-twitter"></i></a></li>
+						<li><a href="http://www.confd.io">http://www.confd.io</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h4>confd-data-container-generator</h4>
+					<ul>
+						<li>Générateur de data-container avec la base confd pour le backend "env"</li>
+						<li>Va aussi gérer des fichiers (au lieu de seulement des valeurs)</li>
+						<li><a href="https://gitlab.com/nodevops/confd-data-container-generator"><i class="fa fa-gitlab"></i> nodevops/confd-data-container-generator</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Confd avec la source de valeurs "env"</p>
+					</header>
+					<p>Les utilisateurs collaborent sur la configuration par le biais de git et de la structure hiérarchisée</p>
+					<pre style="width: 100%"><code class="sh" data-trim contenteditable>
+├── data
+│   ├── dev-local (rep)
+│   ├── acc-1 (rep)
+│   ├── prod (rep)
+│   └── common (rep)
+└── dictionaries
+    ├── dev-local (rep)
+    ├── acc-1 (rep)
+    ├── prod (rep)
+    └── common.dict (fic)
+					</code></pre>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Confd avec la source de valeurs "env"</p>
+					</header>
+					<p>Les tags Git permettent de figer<br/> une "version pour un env"</p>
+					<ul>
+						<li><code>v0.2.3_dev-local</code></li>
+						<li><code>v0.2.4_acc-1</code></li>
+						<li><code>v0.2.4_dev-local</code></li>
+						<li><code>v0.2.4_prod</code></li>
+						<li><code>v0.2.5_acc-1</code></li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Confd avec la source de valeurs "env"</p>
+					</header>
+					<p>Les images des apps embarquent les modèles de fichier</p>
+					<pre style="width: 100%"><code class="sh" data-trim contenteditable>
+└── src
+    ├── main
+    │   ├── confd
+    │   │   ├── conf.d
+    │   │   └── templates
+    │   ├── java
+    │   │   └── net
+    │   ├── resources
+    │   └── scripts
+    └── test
+        └── java
+            └── net
+					</code></pre>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Exemple de template</p>
+					</header>
+					<pre style="width: 100%"><code class="yaml" data-trim contenteditable>
+filter:
+  sanitize:
+    url: /api/v1/filter/sanitize
+guestbook:
+  messages:
+    url: /api/v1/guestbook/messages
+info:
+  custom:
+    env: {{ getv "/guestbook/shared/info/custom/env" }}
+    message: {{ getv "/guestbook/filter/info/custom/message" }}
+					</code></pre>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Confd avec la source de valeurs "env"</p>
+					</header>
+					<p>Les images de configuration embarquent les fichiers bruts et les valeurs pour les modèles sous la forme de vars d'environnement</p>
+					<pre style="width: 100%"><code class="sh" data-trim contenteditable>
+└── config
+    ├── dictionnaries
+    │   └── env.sh
+    └── data
+        ├── dummy.txt
+        └── filterDefinition.properties
+					</code></pre>
+				</section>
+
+				<section>
+					<header>
+						<h4>Workflow</h4>
+						<p>Confd avec la source de valeurs "env"</p>
+					</header>
+					<p>Containers d’application :</p>
+					<ul>
+						<li class="fragment">Démarrés avec les volumes des containers de config</li>
+						<li class="fragment">
+							Lancement d’un wrapper qui :
+							<ul>
+								<li class="fragment">
+									Génère la config en assemblant :
+									<ul>
+										<li>Les modèles présent dans le container d'appli</li>
+										<li>Les valeurs présentes dans le container de configuration</li>
+									</ul>
+								</li>
+								<li class="fragment">Démarre l'appli qui utilise la config générée et les fichiers bruts</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h2>Démo</h2>
+						<p>Croisons les doigts</p>
+					</header>
+				</section>
+
+				<section>
+					<header>
+						<h4>Remarques</h4>
+						<p>Coupure introspection</p>
+					</header>
+					<ul>
+						<li>
+							Compatible avec
+							<ul>
+								<li>Solution#3/data-containers</li>
+								<li>Solution#5/Solution orchestrateur</li>
+							</ul>
+						</li>
+						<li>Ça marche aussi avec des applications qui ne sont pas dans des containers !!!</li>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Opportunités</h4>
+						<p>Étapes suivantes pour confd-data-container-generator</p>
+					</header>
+					<ul>
+						<li>
+							Proposer de prendre en compte les sources Consul et Etcd
+							<ul>
+								<li>La version de la configuration sera intégrée dans la définition du namespace côté consul et etcd</li>
+							</ul>
+						</li>
+					</ul>
+					<code class="sh">/config/dict/prod/v1.3.1/guestbook/...</code>
+				</section>
+
+				<section>
+					<header>
+						<h4>Opportunités</h4>
+						<p>Étapes suivantes</p>
+					</header>
+					<ul>
+						<li>
+							Plus d'outils
+							<ul>
+								<li>Diff entre environnements (<a href="https://gitlab.com/nodevops/dict-explorer-ui"><i class="fa fa-gitlab"></i> dépôt</a>, <a href="http://dict-explorer.wip.zenika.com/">démo</a>)</li>
+								<li>Comparer une clé+valeur sur tous les environnements (idem)</li>
+								<li>Lister les clés inutilisées dans les dict</li>
+								<li>Appli Web facilitant la contribution à la configuration d'utilisateurs moins techniques</li>
+							</ul>
+						</li>
+						<p>(Bientôt sur <a href="https://gitlab.com/nodevops"><i class="fa fa-gitlab"></i> nodevops</a>)</p>
+					</ul>
+				</section>
+
+				<section>
+					<header>
+						<h4>Liens</h4>
+						<p>Servez-vous</p>
+					</header>
+					<ul>
+						<li><a href="https://gitlab.com/nodevops/confd-data-container-generator"><i class="fa fa-gitlab"></i> nodevops/confd-data-container-generator</a></li>
+						<li><a href="https://gitlab.com/nodevops/dict-explorer"><i class="fa fa-gitlab"></i> nodevops/dict-explorer</a></li>
+						<li><a href="https://github.com/looztra/guestbook-api-server"><i class="fa fa-github"></i> looztra/guestbook-api-server</a></li>
+						<li><a href="https://gitlab.com/cfurmaniak/guestbook-configuration-confd"><i class="fa fa-gitlab"></i> cfurmaniak/guestbook-configuration-confd</a></li>
+						<li><a href="https://github.com/nodevops/confd-maven-plugin"><i class="fa fa-github"></i> nodevops/confd-maven-plugin</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Merci</h2>
+					<h3>Des questions ?</h3>
+				</section>
 			</div>
 		</div>
 
@@ -37,6 +602,8 @@
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
 			Reveal.initialize({
+				history: true,
+				transition: 'none',
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
