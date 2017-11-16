@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+
+  filter:
+    build:
+      context: .
+      dockerfile: Dockerfile.all-envs-in-one
+    environment:
+      SPRING_CONFIG_LOCATION: /data/env/${ENV}/application.yml
+      FILTER_DEFINITION_FILENAME: /data/env/${ENV}/filterDefinition.properties

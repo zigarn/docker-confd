@@ -1,0 +1,5 @@
+FROM looztra/guestbook-filter:0.6.0-aio
+
+COPY acc-1/ /data/env/acc-1
+COPY dev-local/ /data/env/dev-local
+COPY prod/ /data/env/prod
