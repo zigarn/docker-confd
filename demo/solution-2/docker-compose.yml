@@ -1,0 +1,10 @@
+version: '3.3'
+
+services:
+
+  filter:
+    image: guestbook-filter
+    build: .
+    volumes:
+      - ./${ENV}/application.yml:/data/application.yml
+      - ./${ENV}/filterDefinition.properties:/data/filterDefinition.properties

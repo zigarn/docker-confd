@@ -1,0 +1,23 @@
+management:
+  context-path: /admin
+  security:
+    enabled: false
+  info:
+    git:
+      mode: full
+
+server:
+  port: 8080
+
+filter:
+  version: 1.0
+  definition:
+    filename: /data/filterDefinition.properties
+  empty:
+    message:
+      feedback: I hate emtpy strings on acc-1 env!
+
+info:
+  custom:
+    env: acc-1
+    message: rancher rulez
