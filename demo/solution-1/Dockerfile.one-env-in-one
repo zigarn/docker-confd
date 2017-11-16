@@ -1,0 +1,7 @@
+FROM looztra/guestbook-filter:0.6.0-aio
+
+ARG ENV
+
+ENV SPRING_CONFIG_LOCATION=/data/application.yml
+
+COPY ${ENV} /data/

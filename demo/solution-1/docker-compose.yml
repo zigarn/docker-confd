@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+
+  filter:
+    image: guestbook-filter-${ENV}
+    build:
+      context: .
+      dockerfile: Dockerfile.one-env-in-one
+      args:
+        ENV: ${ENV}
