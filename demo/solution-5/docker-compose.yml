@@ -1,0 +1,21 @@
+version: '3.3'
+
+services:
+
+  filter:
+    image: looztra/guestbook-filter:0.6.0-aio
+    environment:
+      SPRING_CONFIG_LOCATION: /data/application.yml
+    deploy:
+      placement: {}
+    configs:
+      - source: application
+        target: /data/application.yml
+      - source: filterDefinition
+        target: /data/filterDefinition.properties
+
+configs:
+  application:
+    file: ./${ENV}/application.yml
+  filterDefinition:
+    file: ./${ENV}/filterDefinition.properties
