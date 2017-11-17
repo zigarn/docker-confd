@@ -6,26 +6,13 @@ services:
     image: looztra/guestbook-filter:0.6.0-aio
     environment:
       SPRING_CONFIG_LOCATION: /data/application.yml
+    deploy:
+      placement: {}
     volumes:
       - type: volume
         source: filter_config
         target: /data
         read_only: yes
-    depends_on:
-      - filter_config
-
-  filter_config:
-    image: env-guestbook:${ENV}
-    build:
-      context: .
-      dockerfile: Dockerfile.conf
-      args:
-        ENV: ${ENV}
-    command: /bin/true
-    volumes:
-      - type: volume
-        source: filter_config
-        target: /data
 
 volumes:
   filter_config:

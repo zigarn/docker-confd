@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+
+  filter_config:
+    image: zigarn/env-guestbook:${ENV}
+    build:
+      context: .
+      dockerfile: Dockerfile.conf
+      args:
+        ENV: ${ENV}
+    command: /bin/true
+    volumes:
+      - type: volume
+        source: filter_config
+        target: /data
+    deploy:
+      mode: global
+      restart_policy:
+        condition: none
+
+volumes:
+  filter_config:
