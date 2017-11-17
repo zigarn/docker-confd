@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+
+  filter_config:
+    image: zigarn/env-guestbook-confd:${ENV}--${VERSION}
+    command: /bin/true
+    volumes:
+      - type: volume
+        source: filter_config
+        target: /config
+    deploy:
+      mode: global
+      restart_policy:
+        condition: none
+
+volumes:
+  filter_config:

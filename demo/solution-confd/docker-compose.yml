@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+
+  filter:
+    image: looztra/guestbook-filter:0.6.0-confd
+    environment:
+      SPRING_CONFIG_LOCATION: /data/application.yml
+    deploy:
+      placement: {}
+    volumes:
+      - type: volume
+        source: filter_config
+        target: /config
+        read_only: yes
+
+volumes:
+  filter_config:
